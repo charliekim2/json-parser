@@ -4,34 +4,45 @@ from typing import Dict, List
 
 class Parser:
     def __init__(self, fs: io.TextIOBase) -> None:
-        self.filestream = fs
-        self.lexer = Lexer(self.filestream)
+        self.filestream: io.TextIOBase = fs
+        self.lexer: Lexer = Lexer(self.filestream)
+        self.currTok: str = ""
 
-    def parse_array(self) -> List[object]:
+        self.next()
+        if self.currTok != JSON_LEFTBRACE and self.currTok != JSON_LEFTBRACKET:
+            raise Exception("Not a valid JSON object")
+
+    def next(self) -> None:
+        self.currTok = self.lexer.getTok()
+
+    def parse_list(self) -> List[object]:
         arr = []
 
-        tok = self.lexer.getTok()
-        while tok != JSON_RIGHTBRACKET:
-            parsedTok = self.parse(tok)
+        # Consume left bracket
+        self.next()
+        while self.currTok != JSON_RIGHTBRACKET:
+            parsedTok = self.parse()
             arr.append(parsedTok)
 
-            tok = self.lexer.getTok()
-            if tok == JSON_COMMA:
-                tok = self.lexer.getTok()
-                continue
-            elif tok != JSON_RIGHTBRACKET:
+            if self.currTok == JSON_COMMA:
+                # Consume comma and proceed to next list item
+                self.next()
+            elif self.currTok != JSON_RIGHTBRACKET:
                 raise Exception(
                     f"Expected end of array ] or comma at line {self.lexer.lineNum}"
                 )
 
+        # Consume right bracket
+        self.next()
         return arr
 
     def parse_object(self) -> Dict:
         obj = {}
 
-        tok = self.lexer.getTok()
-        while tok != JSON_RIGHTBRACE:
-            parsedKey = self.parse(tok)
+        # Consume left brace
+        self.next()
+        while self.currTok != JSON_RIGHTBRACE:
+            parsedKey = self.parse()
             # Python cannot hash dicts, arrays, bools...
             if type(parsedKey) not in (str, int, float):
                 parsedKey = str(parsedKey)
@@ -39,57 +50,65 @@ class Parser:
                 raise Exception(
                     f"Duplicate field {parsedKey} found on line {self.lexer.lineNum}"
                 )
-            if self.lexer.getTok() != JSON_COLON:
+
+            if self.currTok != JSON_COLON:
                 raise Exception(
                     f"Expected colon after key {parsedKey} on line {self.lexer.lineNum}"
                 )
 
-            tok = self.lexer.getTok()
-            parsedVal = self.parse(tok)
+            # Consume colon and get value
+            self.next()
+            parsedVal = self.parse()
             obj[parsedKey] = parsedVal
 
-            tok = self.lexer.getTok()
-            if tok == JSON_COMMA:
-                tok = self.lexer.getTok()
-            elif tok != JSON_RIGHTBRACE:
+            if self.currTok == JSON_COMMA:
+                # Consume comma and proceed to next kvp
+                self.next()
+            elif self.currTok != JSON_RIGHTBRACE:
                 raise Exception(
                     f"Expected end of object or comma at line {self.lexer.lineNum}"
                 )
 
+        # Consume right brace
+        self.next()
         return obj
 
-    def parse(self, tok="", is_root=False) -> object:
-        if not tok:
-            return self.parse(self.lexer.getTok(), True)
+    def parse(self):
+        if self.currTok == "EOF":
+            raise Exception("Nothing to parse")
 
-        if is_root and tok != JSON_LEFTBRACE:
-            raise Exception("Not a valid JSON object")
-
-        if tok == JSON_LEFTBRACKET:
-            return self.parse_array()
-        if tok == JSON_LEFTBRACE:
+        if self.currTok == JSON_LEFTBRACKET:
+            return self.parse_list()
+        if self.currTok == JSON_LEFTBRACE:
             return self.parse_object()
-        return self.cast(tok)
+        return self.cast()
 
-    def cast(self, tok: str):
-        if tok[0] == JSON_QUOTE:
-            return tok[1:]
-        elif tok[0] in JSON_NUMERIC:
+    def cast(self):
+        tok = ""
+        if self.currTok[0] == JSON_QUOTE:
+            tok = self.currTok[1:]
+        elif self.currTok[0] in JSON_NUMERIC:
             try:
-                if "." in tok:
-                    return float(tok)
-                return int(tok)
+                if "." in self.currTok:
+                    tok = float(self.currTok)
+                else:
+                    tok = int(self.currTok)
             except ValueError:
                 raise Exception(
-                    f"{tok} is an invalid number on line {self.lexer.lineNum}"
+                    f"{self.currTok} is an invalid number on line {self.lexer.lineNum}"
                 )
             except Exception as e:
                 raise e
-        elif tok == JSON_TRUE:
-            return True
-        elif tok == JSON_FALSE:
-            return False
-        elif tok == JSON_NULL:
-            return None
+        elif self.currTok == JSON_TRUE:
+            tok = True
+        elif self.currTok == JSON_FALSE:
+            tok = False
+        elif self.currTok == JSON_NULL:
+            tok = None
+        else:
+            raise Exception(
+                f"Error casting self.currToken {self.currTok} on line {self.lexer.lineNum}"
+            )
 
-        raise Exception(f"Error casting token {tok} on line {self.lexer.lineNum}")
+        self.next()
+        return tok
