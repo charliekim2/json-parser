@@ -1,0 +1,19 @@
+{
+  "people": [
+    {
+      "name": "cha",
+      "projects": {
+        1: "json parser"
+      }
+    },
+    {
+      "name": "jimbo",
+      "age": 30.10,
+      ["random", "array"]: {}
+    }
+  ],
+  true: false,
+  false: true,
+  "spaghetti code": true,
+  "actually parses json correctly": null
+}
