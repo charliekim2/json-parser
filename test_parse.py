@@ -22,5 +22,5 @@ def profile_parsers(filename: str) -> None:
 
 
 if __name__ == "__main__":
-    profile_parsers("./64KB.json")
-    profile_parsers("./5MB.json")
+    profile_parsers("./sample/64KB.json")
+    profile_parsers("./sample/5MB.json")
