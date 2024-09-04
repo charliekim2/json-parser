@@ -4,8 +4,7 @@ from typing import Dict, List
 
 class Parser:
     def __init__(self, fs: io.TextIOBase) -> None:
-        self.filestream: io.TextIOBase = fs
-        self.lexer: Lexer = Lexer(self.filestream)
+        self.lexer: Lexer = Lexer(fs)
         self.currTok: str = ""
 
         self.next()

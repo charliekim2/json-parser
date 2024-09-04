@@ -5,10 +5,10 @@ from constants import *
 class Lexer:
 
     def __init__(self, fs: io.TextIOBase) -> None:
-        self.stream = fs
-        self.line = self.stream.readline()
-        self.lineNum = 1
-        self.curr = ""
+        self.stream: io.TextIOBase = fs
+        self.line: str = self.stream.readline()
+        self.lineNum: int = 1
+        self.curr: str = ""
 
     def lex_string(self) -> str:
         # parser knows token is string if it starts with "
