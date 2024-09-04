@@ -25,7 +25,7 @@ class Lexer:
 
         return json_string
 
-    def lex_realnum(self) -> str:
+    def lex_number(self) -> str:
         json_num = ""
 
         if self.curr not in JSON_NUMERIC:
@@ -38,46 +38,11 @@ class Lexer:
 
         return json_num
 
-    def lex_fakenum(self):
-        if (
-            len(self.line) >= len(JSON_INFINITY)
-            and self.line[: len(JSON_INFINITY)] == JSON_INFINITY
-        ):
-            self.line = self.line[len(JSON_INFINITY) :]
-            return JSON_INFINITY
-        if (
-            len(self.line) >= len(JSON_NINFINITY)
-            and self.line[: len(JSON_NINFINITY)] == JSON_NINFINITY
-        ):
-            self.line = self.line[len(JSON_NINFINITY) :]
-            return JSON_NINFINITY
-        if len(self.line) >= len(JSON_NAN) and self.line[: len(JSON_NAN)] == JSON_NAN:
-            self.line = self.line[len(JSON_NAN) :]
-            return JSON_NAN
-        return ""
-
-    def lex_bool(self) -> str:
-        if (
-            len(self.line) >= len(JSON_TRUE)
-            and self.line[: len(JSON_TRUE)] == JSON_TRUE
-        ):
-            self.line = self.line[len(JSON_TRUE) :]
-            return JSON_TRUE
-        if (
-            len(self.line) >= len(JSON_FALSE)
-            and self.line[: len(JSON_FALSE)] == JSON_FALSE
-        ):
-            self.line = self.line[len(JSON_FALSE) :]
-            return JSON_FALSE
-        return ""
-
-    def lex_null(self) -> str:
-        if (
-            len(self.line) >= len(JSON_NULL)
-            and self.line[: len(JSON_NULL)] == JSON_NULL
-        ):
-            self.line = self.line[len(JSON_NULL) :]
-            return JSON_NULL
+    def lex_const(self) -> str:
+        for const in JSON_CONST:
+            if len(self.line) >= len(const) and self.line[: len(const)] == const:
+                self.line = self.line[len(const) :]
+                return const
         return ""
 
     def getTok(self) -> str:
@@ -85,24 +50,17 @@ class Lexer:
         while self.peek() in JSON_WHITESPACE:
             self.nextChar()
 
-        json_bool = self.lex_bool()
-        if json_bool:
-            return json_bool
-        json_null = self.lex_null()
-        if json_null:
-            return json_null
-        json_fakenum = self.lex_fakenum()
-        if json_fakenum:
-            return json_fakenum
+        json_const = self.lex_const()
+        if json_const:
+            return json_const
 
         self.nextChar()
-
         if self.curr in JSON_SYNTAX:
             return self.curr
         if self.curr == JSON_QUOTE:
             return self.lex_string()
 
-        json_realnum = self.lex_realnum()
+        json_realnum = self.lex_number()
         if json_realnum:
             return json_realnum
 
