@@ -1,6 +1,6 @@
-from parsing import Parser
 from time import process_time
 import json
+import myjson
 
 
 def profile_parsers(filename):
@@ -10,10 +10,8 @@ def profile_parsers(filename):
 
     for _ in range(num_iterations):
         with open(filename, "r") as f:
-            parser = Parser(f)
-
             start = process_time()
-            parser.parse()
+            myjson.load(f)
             end = process_time()
 
             myparser_total += end - start
