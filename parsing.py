@@ -87,7 +87,7 @@ class Parser:
         tok = ""
         if self.currTok[0] == JSON_QUOTE:
             tok = self.currTok[1:]
-        elif self.currTok[0] in JSON_NUMERIC:
+        elif self.currTok[0] in JSON_NUMERIC and self.currTok != JSON_NINFINITY:
             try:
                 if "." in self.currTok:
                     tok = float(self.currTok)
@@ -105,6 +105,12 @@ class Parser:
             tok = False
         elif self.currTok == JSON_NULL:
             tok = None
+        elif self.currTok == JSON_INFINITY:
+            tok = float("inf")
+        elif self.currTok == JSON_NINFINITY:
+            tok = float("-inf")
+        elif self.currTok == JSON_NAN:
+            tok = float("nan")
         else:
             raise Exception(
                 f"Error casting self.currToken {self.currTok} on line {self.lexer.lineNum}"

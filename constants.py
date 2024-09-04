@@ -20,3 +20,6 @@ JSON_NUMERIC = [str(d) for d in range(0, 10)] + ["-", "e", "."]
 JSON_FALSE = "false"
 JSON_TRUE = "true"
 JSON_NULL = "null"
+JSON_INFINITY = "Infinity"
+JSON_NINFINITY = "-Infinity"
+JSON_NAN = "NaN"

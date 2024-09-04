@@ -15,5 +15,11 @@
   true: false,
   false: true,
   "spaghetti code": true,
-  "actually parses json correctly": null
+  "actually parses json correctly": null,
+  "fakenums": {
+    "nan": NaN,
+    "infinity": Infinity,
+    "ninfinity:": -Infinity
+  }
+ 
 }

@@ -2,7 +2,7 @@ from lexing import Lexer
 
 
 if __name__ == "__main__":
-    with open("test.json", "r") as f:
+    with open("./sample/test.json", "r") as f:
         lexer = Lexer(f)
         toks = []
         tok = lexer.getTok()

@@ -25,7 +25,7 @@ class Lexer:
 
         return json_string
 
-    def lex_number(self) -> str:
+    def lex_realnum(self) -> str:
         json_num = ""
 
         if self.curr not in JSON_NUMERIC:
@@ -37,6 +37,24 @@ class Lexer:
             self.nextChar()
 
         return json_num
+
+    def lex_fakenum(self):
+        if (
+            len(self.line) >= len(JSON_INFINITY)
+            and self.line[: len(JSON_INFINITY)] == JSON_INFINITY
+        ):
+            self.line = self.line[len(JSON_INFINITY) :]
+            return JSON_INFINITY
+        if (
+            len(self.line) >= len(JSON_NINFINITY)
+            and self.line[: len(JSON_NINFINITY)] == JSON_NINFINITY
+        ):
+            self.line = self.line[len(JSON_NINFINITY) :]
+            return JSON_NINFINITY
+        if len(self.line) >= len(JSON_NAN) and self.line[: len(JSON_NAN)] == JSON_NAN:
+            self.line = self.line[len(JSON_NAN) :]
+            return JSON_NAN
+        return ""
 
     def lex_bool(self) -> str:
         if (
@@ -73,6 +91,9 @@ class Lexer:
         json_null = self.lex_null()
         if json_null:
             return json_null
+        json_fakenum = self.lex_fakenum()
+        if json_fakenum:
+            return json_fakenum
 
         self.nextChar()
 
@@ -81,9 +102,9 @@ class Lexer:
         if self.curr == JSON_QUOTE:
             return self.lex_string()
 
-        json_num = self.lex_number()
-        if json_num:
-            return json_num
+        json_realnum = self.lex_realnum()
+        if json_realnum:
+            return json_realnum
 
         if self.curr == "EOF":
             return "EOF"
@@ -92,7 +113,7 @@ class Lexer:
 
     def nextChar(self) -> None:
         c = self.peek()
-        if c == "\n":
+        if len(self.line) == 1:
             self.line = self.stream.readline()
             self.lineNum += 1
         elif c:

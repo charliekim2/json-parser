@@ -3,7 +3,7 @@ from time import process_time
 import json
 
 
-def profile_parsers(filename: str) -> None:
+def profile_parsers(filename):
     num_iterations = 10
     myparser_total = 0
     jsonload_total = 0
