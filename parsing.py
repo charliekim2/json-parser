@@ -42,14 +42,16 @@ class Parser:
         self.next()
         while self.currTok != JSON_RIGHTBRACE:
             parsedKey = self.parse()
-            # Python cannot hash dicts, arrays, bools...
-            if type(parsedKey) not in (str, int, float):
-                parsedKey = str(parsedKey)
+
+            # JSON keys must be strings
+            if type(parsedKey) != str:
+                raise Exception(
+                    f"Invalid key of type {type(parsedKey)} on line {self.lexer.lineNum}"
+                )
             if parsedKey in obj:
                 raise Exception(
                     f"Duplicate field {parsedKey} found on line {self.lexer.lineNum}"
                 )
-
             if self.currTok != JSON_COLON:
                 raise Exception(
                     f"Expected colon after key {parsedKey} on line {self.lexer.lineNum}"

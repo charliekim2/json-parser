@@ -15,13 +15,13 @@ class Lexer:
         json_string = '"'
 
         self.nextChar()
-        while self.curr != JSON_QUOTE and self.curr != "":
+        while self.curr and self.curr not in (JSON_QUOTE, "\n", "EOF"):
             json_string += self.curr
             self.nextChar()
 
-        # EOF before ending quote
-        if not self.curr:
-            raise Exception("Expected end of string quote")
+        # EOF or line break before ending quote
+        if self.curr != JSON_QUOTE:
+            raise Exception(f"Expected end of string quote on line {self.lineNum}")
 
         return json_string
 
