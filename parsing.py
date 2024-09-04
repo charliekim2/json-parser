@@ -111,8 +111,9 @@ class Parser:
         elif self.currTok == JSON_NAN:
             tok = float("nan")
         else:
+            # This should never evaluate because the lexer would raise an exception first
             raise Exception(
-                f"Error casting self.currToken {self.currTok} on line {self.lexer.lineNum}"
+                f"Error casting token {self.currTok} on line {self.lexer.lineNum}"
             )
 
         self.next()
